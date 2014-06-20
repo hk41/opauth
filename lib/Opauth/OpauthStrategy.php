@@ -419,6 +419,10 @@ class OpauthStrategy {
 		}
 		$context = stream_context_create($options);
 
+		if (strpos($url, '&amp;') !== false) {
+			$url = str_replace('&amp;', '&', $url);
+		}
+
 		$content = file_get_contents($url, false, $context);
 		$responseHeaders = implode("\r\n", $http_response_header);
 
