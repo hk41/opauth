@@ -408,6 +408,7 @@ class OpauthStrategy {
 	 */
 	public static function httpRequest($url, $options = null, &$responseHeaders = null) {
 		$context = null;
+/**
 		if (!empty($options) && is_array($options)) {
 			if (empty($options['http']['header'])) {
 				$options['http']['header'] = "User-Agent: opauth";
@@ -425,6 +426,24 @@ class OpauthStrategy {
 
 		$content = file_get_contents($url, false, $context);
 		$responseHeaders = implode("\r\n", $http_response_header);
+**/
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'opauth');
+    if(substr($url,0,8)=='https://'){
+      // The following ensures SSL always works. A little detail:
+      // SSL does two things at once:
+      //  1. it encrypts communication
+      //  2. it ensures the target party is who it claims to be.
+      // In short, if the following code is allowed, CURL won't check if the
+      // certificate is known and valid, however, it still encrypts communication.
+      curl_setopt($ch,CURLOPT_HTTPAUTH,CURLAUTH_ANY);
+      curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,false);
+    }
+    $content = curl_exec($ch);
+    curl_close($ch);
 
 		return $content;
 	}
